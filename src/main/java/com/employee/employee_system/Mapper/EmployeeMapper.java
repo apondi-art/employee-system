@@ -1,7 +1,7 @@
-package com.employee.employee_system.MAPPER;
+package com.employee.employee_system.Mapper;
 
-import com.employee.employee_system.DTO.EmployeeRequestDto;
-import com.employee.employee_system.DTO.EmployeeResponseDto;
+import com.employee.employee_system.Dto.EmployeeRequestDto;
+import com.employee.employee_system.Dto.EmployeeResponseDto;
 import com.employee.employee_system.entity.Employee;
 import org.springframework.stereotype.Component;
 

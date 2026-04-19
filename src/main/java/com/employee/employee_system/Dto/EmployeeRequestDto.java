@@ -1,4 +1,4 @@
-package com.employee.employee_system.DTO;
+package com.employee.employee_system.Dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
