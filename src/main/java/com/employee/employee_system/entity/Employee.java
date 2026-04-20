@@ -2,10 +2,7 @@ package com.employee.employee_system.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,13 +10,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "employee")
-@Data
+@Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
@@ -47,6 +44,7 @@ public class Employee {
     @PastOrPresent
     private LocalDate dateOfJoining;
 
+    @Builder.Default
     @NotNull
     private Boolean active = true;
 

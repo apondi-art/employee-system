@@ -39,5 +39,6 @@ public class EmployeeRequestDto {
     private LocalDate dateOfJoining;
 
     // If client omits this field, it defaults to true
+    @Builder.Default
     private Boolean active = true;
 }

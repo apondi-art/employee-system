@@ -3,6 +3,7 @@ package com.employee.employee_system.service;
 import com.employee.employee_system.Dto.EmployeeRequestDto;
 import com.employee.employee_system.Dto.EmployeeResponseDto;
 import com.employee.employee_system.entity.Employee;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,14 +13,14 @@ import java.util.Map;
 
 public interface EmployeeService {
 
-    EmployeeResponseDto create(EmployeeRequestDto dto);
+    EmployeeResponseDto create(@Valid EmployeeRequestDto dto);
 
     EmployeeResponseDto findById(Long id);
 
     Page<EmployeeResponseDto> findAll(
             String department, Boolean active, Pageable pageable);
 
-    EmployeeResponseDto update(Long id, EmployeeRequestDto dto);
+    EmployeeResponseDto update(Long id, @Valid EmployeeRequestDto dto);
 
     EmployeeResponseDto partialUpdate(Long id,
                                       Map<String, Object> fields);

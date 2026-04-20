@@ -7,7 +7,6 @@ import com.employee.employee_system.Exception.EmployeeNotFoundException;
 import com.employee.employee_system.Mapper.EmployeeMapper;
 import com.employee.employee_system.entity.Employee;
 import com.employee.employee_system.repository.EmployeeRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // ── CREATE ──────────────────────────────────────────────
     @Override
-    public EmployeeResponseDto create(@Valid EmployeeRequestDto dto) {
+    public EmployeeResponseDto create(EmployeeRequestDto dto) {
 
         // Business Rule 1: no duplicate emails
         repo.findByEmail(dto.getEmail()).ifPresent(existing -> {
@@ -65,7 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     // ── FULL UPDATE (PUT) ────────────────────────────────────
     @Override
     public EmployeeResponseDto update(Long id,
-                                      @Valid EmployeeRequestDto dto) {
+                                      EmployeeRequestDto dto) {
 
         Employee existing = repo.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));

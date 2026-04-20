@@ -1,6 +1,8 @@
 package com.employee.employee_system.Exception;
 
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // 404 — employee not found
     @ExceptionHandler(EmployeeNotFoundException.class)
@@ -66,9 +70,28 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(400, ex.getMessage(), null));
     }
 
-    // 500 — catch-all safety net
+    // fired by: throw new IllegalArgumentException("Minimum salary...")
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(400, ex.getMessage(), null));
+    }
+
+    // fired by: throw new IllegalStateException("Cannot hard-delete...")
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(
+            IllegalStateException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(400, ex.getMessage(), null));
+    }
+
+    // 500 — catch-all safety net — ALWAYS keep this last
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(500,
