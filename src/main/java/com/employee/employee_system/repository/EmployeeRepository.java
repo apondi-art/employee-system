@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 // Extends JpaRepository → free: save, findById, findAll,
@@ -16,32 +15,19 @@ import java.util.Optional;
 public interface EmployeeRepository
         extends JpaRepository<Employee, Long> {
 
-    // Spring reads the method name and generates:
-    // SELECT * FROM employee WHERE department = ?
-    List<Employee> findByDepartment(String department);
-
-    // SELECT * FROM employee WHERE email = ?  — returns Optional
-    // Optional forces the caller to handle "not found" safely
     Optional<Employee> findByEmail(String email);
 
-    // SELECT * FROM employee WHERE active = true
-    List<Employee> findByActiveTrue();
-
-    // @Query lets you write JPQL when method names get complex
-    // :min and :max are named parameters bound by @Param
-    @Query("SELECT e FROM Employee e WHERE e.salary BETWEEN :min AND :max")
-    List<Employee> findBySalaryRange(
-            @Param("min") BigDecimal min,
-            @Param("max") BigDecimal max
-    );
-
-    // Dynamic filter used by paginated list endpoint
+    // Dynamic filter — all params are optional (null = ignored)
     @Query("SELECT e FROM Employee e WHERE "
             + "(:dept IS NULL OR e.department = :dept) AND "
-            + "(:active IS NULL OR e.active = :active)")
+            + "(:active IS NULL OR e.active = :active) AND "
+            + "(:minSalary IS NULL OR e.salary >= :minSalary) AND "
+            + "(:maxSalary IS NULL OR e.salary <= :maxSalary)")
     Page<Employee> findAllFiltered(
-            @Param("dept") String dept,
-            @Param("active") Boolean active,
+            @Param("dept")      String     dept,
+            @Param("active")    Boolean    active,
+            @Param("minSalary") BigDecimal minSalary,
+            @Param("maxSalary") BigDecimal maxSalary,
             Pageable pageable
     );
 }
