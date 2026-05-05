@@ -5,6 +5,7 @@ import com.employee.employee_system.Dto.EmployeeResponseDto;
 import com.employee.employee_system.Exception.DuplicateEmailException;
 import com.employee.employee_system.Exception.EmployeeNotFoundException;
 import com.employee.employee_system.Mapper.EmployeeMapper;
+import com.employee.employee_system.email.EmailService;
 import com.employee.employee_system.entity.Employee;
 import com.employee.employee_system.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class EmployeeServiceImplTest {
 
     @Mock
     private EmployeeMapper mapper;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private EmployeeServiceImpl service;
