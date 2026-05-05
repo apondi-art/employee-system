@@ -60,7 +60,7 @@ class EmployeeControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        return objectMapper.readTree(body).get("id").asLong();
+        return objectMapper.readTree(body).get("data").get("id").asLong();
     }
 
     // ── POST /api/v1/employees ────────────────────────────────────────────────
@@ -71,9 +71,10 @@ class EmployeeControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.email").value("john@example.com"))
-                .andExpect(jsonPath("$.department").value("Engineering"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.email").value("john@example.com"))
+                .andExpect(jsonPath("$.data.department").value("Engineering"));
     }
 
     @Test
@@ -135,8 +136,8 @@ class EmployeeControllerIntegrationTest {
 
         mockMvc.perform(get("/api/v1/employees/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.firstName").value("John"));
+                .andExpect(jsonPath("$.data.id").value(id))
+                .andExpect(jsonPath("$.data.firstName").value("John"));
     }
 
     @Test
@@ -155,8 +156,8 @@ class EmployeeControllerIntegrationTest {
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.totalElements").value(1));
     }
 
     @Test
@@ -172,8 +173,8 @@ class EmployeeControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/employees")
                         .param("department", "Engineering"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].department").value("Engineering"));
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.content[0].department").value("Engineering"));
     }
 
     // ── PUT /api/v1/employees/{id} ────────────────────────────────────────────
@@ -190,8 +191,8 @@ class EmployeeControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Jane"))
-                .andExpect(jsonPath("$.salary").value(60000));
+                .andExpect(jsonPath("$.data.firstName").value("Jane"))
+                .andExpect(jsonPath("$.data.salary").value(60000));
     }
 
     @Test
@@ -209,12 +210,13 @@ class EmployeeControllerIntegrationTest {
         Long id = createEmployee(validRequest());
 
         mockMvc.perform(delete("/api/v1/employees/{id}", id))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
 
         // employee still exists but active = false
         mockMvc.perform(get("/api/v1/employees/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.active").value(false));
+                .andExpect(jsonPath("$.data.active").value(false));
     }
 
     @Test
@@ -231,7 +233,7 @@ class EmployeeControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/employees/{id}", id));   // soft-delete first
 
         mockMvc.perform(delete("/api/v1/employees/{id}/hard", id))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/employees/{id}", id))
                 .andExpect(status().isNotFound());
@@ -246,27 +248,27 @@ class EmployeeControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value(containsString("Cannot hard-delete")));
     }
 
-    // ── GET /api/v1/employees/salary-range ───────────────────────────────────
+    // ── GET /api/v1/employees?minSalary=&maxSalary= ──────────────────────────
 
     @Test
-    void salaryRange_returnsMatchingEmployees() throws Exception {
+    void getAll_filterBySalaryRange_returnsMatchingEmployees() throws Exception {
         createEmployee(validRequest());   // salary 55 000
 
-        mockMvc.perform(get("/api/v1/employees/salary-range")
-                        .param("min", "40000")
-                        .param("max", "70000"))
+        mockMvc.perform(get("/api/v1/employees")
+                        .param("minSalary", "40000")
+                        .param("maxSalary", "70000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.data.content", hasSize(1)));
     }
 
     @Test
-    void salaryRange_noMatch_returnsEmptyList() throws Exception {
+    void getAll_filterBySalaryRange_noMatch_returnsEmptyPage() throws Exception {
         createEmployee(validRequest());   // salary 55 000
 
-        mockMvc.perform(get("/api/v1/employees/salary-range")
-                        .param("min", "80000")
-                        .param("max", "100000"))
+        mockMvc.perform(get("/api/v1/employees")
+                        .param("minSalary", "80000")
+                        .param("maxSalary", "100000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.data.content", hasSize(0)));
     }
 }
