@@ -18,7 +18,9 @@ public interface EmployeeService {
     EmployeeResponseDto findById(Long id);
 
     Page<EmployeeResponseDto> findAll(
-            String department, Boolean active, Pageable pageable);
+            String department, Boolean active,
+            BigDecimal minSalary, BigDecimal maxSalary,
+            Pageable pageable);
 
     EmployeeResponseDto update(Long id, @Valid EmployeeRequestDto dto);
 
@@ -31,10 +33,7 @@ public interface EmployeeService {
     // Hard delete — permanently removes (only if already inactive)
     void hardDelete(Long id);
 
-    List<EmployeeResponseDto> findBySalaryRange(
-            BigDecimal min, BigDecimal max);
-
-    // Used by Excel/PDF export
+    // Used by PDF export
     List<Employee> findFilteredEntities(
             String department, Boolean active);
 }
