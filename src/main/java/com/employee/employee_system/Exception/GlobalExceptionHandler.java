@@ -61,15 +61,6 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(400, "Constraint violation", errs));
     }
 
-    // 400 — wrong file type uploaded
-    @ExceptionHandler(InvalidFileFormatException.class)
-    public ResponseEntity<ErrorResponse> handleFileFormat(
-            InvalidFileFormatException ex) {
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(400, ex.getMessage(), null));
-    }
-
     // fired by: throw new IllegalArgumentException("Minimum salary...")
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
