@@ -5,6 +5,7 @@ import com.employee.employee_system.Dto.EmployeeResponseDto;
 import com.employee.employee_system.Exception.DuplicateEmailException;
 import com.employee.employee_system.Exception.EmployeeNotFoundException;
 import com.employee.employee_system.Mapper.EmployeeMapper;
+import com.employee.employee_system.email.EmailService;
 import com.employee.employee_system.entity.Employee;
 import com.employee.employee_system.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository repo;
     private final EmployeeMapper mapper;
+    private final EmailService emailService;
 
     // ── CREATE ──────────────────────────────────────────────
     @Override
@@ -40,7 +42,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         validateSalaryFloor(dto.getDepartment(), dto.getSalary());
 
         Employee saved = repo.save(mapper.toEntity(dto));
-        return mapper.toResponseDto(saved);
+        EmployeeResponseDto response = mapper.toResponseDto(saved);
+        emailService.sendWelcomeEmail(response);
+        return response;
     }
 
     // ── READ ONE ─────────────────────────────────────────────
@@ -56,8 +60,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public Page<EmployeeResponseDto> findAll(
-            String dept, Boolean active, Pageable pageable) {
-        return repo.findAllFiltered(dept, active, pageable)
+            String dept, Boolean active,
+            BigDecimal minSalary, BigDecimal maxSalary,
+            Pageable pageable) {
+        return repo.findAllFiltered(dept, active, minSalary, maxSalary, pageable)
                 .map(mapper::toResponseDto);
     }
 
@@ -125,22 +131,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         repo.delete(e);
     }
 
-    // ── SALARY RANGE ─────────────────────────────────────────
-    @Override
-    @Transactional(readOnly = true)
-    public List<EmployeeResponseDto> findBySalaryRange(
-            BigDecimal min, BigDecimal max) {
-        return repo.findBySalaryRange(min, max)
-                .stream()
-                .map(mapper::toResponseDto)
-                .toList();
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<Employee> findFilteredEntities(
             String dept, Boolean active) {
-        return repo.findAllFiltered(dept, active,
+        return repo.findAllFiltered(dept, active, null, null,
                 Pageable.unpaged()).getContent();
     }
 
