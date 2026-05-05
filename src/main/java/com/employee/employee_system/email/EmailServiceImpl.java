@@ -6,7 +6,6 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -19,9 +18,7 @@ public class EmailServiceImpl implements EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     private final JavaMailSender mailSender;
-
-    @Value("${spring.mail.username}")
-    private String from;
+    private final EmailProperties emailProperties;
 
     @Async
     @Override
@@ -30,7 +27,7 @@ public class EmailServiceImpl implements EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(from);
+            helper.setFrom(emailProperties.getFrom());
             helper.setTo(employee.getEmail());
             helper.setSubject("Welcome to the team, " + employee.getFirstName() + "!");
             helper.setText(buildWelcomeHtml(employee), true);
